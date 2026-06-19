@@ -226,7 +226,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-900">
         <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-sm font-semibold text-slate-500 animate-pulse">Memuat Database Lokal...</p>
+        <p className="mt-4 text-sm font-semibold text-slate-500 animate-pulse">Memuat Data...</p>
       </div>
     );
   }
@@ -427,7 +427,7 @@ export default function App() {
               <div className="space-y-1.5 text-[10px] font-semibold text-slate-400">
                 <div className="flex items-center justify-between">
                   <span>Penyimpanan:</span>
-                  <span className="text-indigo-400 font-bold uppercase">IndexedDB (Lokal)</span>
+                  <span className="text-indigo-400 font-bold uppercase">Firestore (Online+Offline)</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Produk Aktif:</span>

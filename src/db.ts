@@ -1,4 +1,4 @@
-// src/db.ts — Firestore CRUD operations (replaces Dexie)
+// src/db.ts — Firestore CRUD operations
 import {
   collection,
   doc,
