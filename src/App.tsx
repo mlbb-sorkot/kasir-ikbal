@@ -12,8 +12,11 @@ import {
   Menu,
   X,
   Maximize,
-  Minimize
+  Minimize,
+  Users
 } from 'lucide-react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './firebase';
 import { User, Product, Transaction } from './types';
 import { INITIAL_PRODUCTS, INITIAL_TRANSACTIONS } from './initialData';
 import {
@@ -25,41 +28,53 @@ import {
   addTransaction,
   deleteTransaction,
   resetDatabase,
-  seedDefaultUsers,
+  getUserProfile,
 } from './db';
 import Login from './components/Login';
 
-// Component imports
 import DashboardOverview from './components/DashboardOverview';
 import POSTerminal from './components/POSTerminal';
 import InventoryManager from './components/InventoryManager';
 import TransactionsHistory from './components/TransactionsHistory';
 import SalesAnalytics from './components/SalesAnalytics';
+import UserManager from './components/UserManager';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'pos' | 'stock' | 'history' | 'history-today' | 'analytics'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'pos' | 'stock' | 'history' | 'history-today' | 'analytics' | 'users'>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Restore session
+  // Firebase Auth state listener
   useEffect(() => {
-    const storedUser = sessionStorage.getItem('IKBAL_KASIR_USER');
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setCurrentUser(user);
-      setIsSidebarCollapsed(true);
-      if (user.role === 'kasir') {
-        setActiveTab('pos');
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        let profile = await getUserProfile(firebaseUser.uid);
+        if (!profile) {
+          await new Promise(r => setTimeout(r, 1500));
+          profile = await getUserProfile(firebaseUser.uid);
+        }
+        if (profile) {
+          setCurrentUser(profile);
+          setIsSidebarCollapsed(true);
+          if (profile.role === 'kasir') {
+            setActiveTab('pos');
+          } else {
+            setActiveTab('dashboard');
+          }
+        }
+      } else {
+        setCurrentUser(null);
       }
-    }
+      setIsLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
-    sessionStorage.setItem('IKBAL_KASIR_USER', JSON.stringify(user));
     setIsSidebarCollapsed(true);
     if (user.role === 'kasir') {
       setActiveTab('pos');
@@ -68,9 +83,9 @@ export default function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut(auth);
     setCurrentUser(null);
-    sessionStorage.removeItem('IKBAL_KASIR_USER');
     setActiveTab('dashboard');
   };
   
@@ -86,9 +101,6 @@ export default function App() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Ensure at least default users exist
-        await seedDefaultUsers();
-
         let dbProducts = await fetchProducts();
         let dbTransactions = await fetchTransactions();
 
@@ -404,6 +416,19 @@ export default function App() {
                 </button>
 
                 <button
+                  onClick={() => changeTab('users')}
+                  title={isSidebarCollapsed ? "Pengguna" : ""}
+                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                    activeTab === 'users'
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                  }`}
+                >
+                  <Users size={16} className={activeTab === 'users' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
+                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Kelola Pengguna</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('analytics')}
                   title={isSidebarCollapsed ? "Utilitas & Analitik" : ""}
                   className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
@@ -488,6 +513,10 @@ export default function App() {
               filterTodayOnly={true}
               allowDelete={false}
             />
+          )}
+
+          {activeTab === 'users' && (
+            <UserManager />
           )}
 
           {activeTab === 'analytics' && (

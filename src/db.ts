@@ -1,14 +1,11 @@
-// src/db.ts — Firestore CRUD operations
 import {
   collection,
   doc,
   getDocs,
+  getDoc,
   setDoc,
-  updateDoc,
   deleteDoc,
-  addDoc,
   writeBatch,
-  onSnapshot,
   query,
   orderBy,
   where,
@@ -17,62 +14,31 @@ import {
 import { db } from './firebase';
 import { Product, Transaction, User } from './types';
 
-// ─── Collections ────────────────────────────────────────────────
 const productsCol = collection(db, 'products');
 const transactionsCol = collection(db, 'transactions');
 const usersCol = collection(db, 'users');
 
-// ─── Authentication ───────────────────────────────────────────────
-export async function authenticateUser(username: string, password: string): Promise<User | null> {
-  const q = query(
-    usersCol,
-    where('username', '==', username),
-    where('password', '==', password),
-    limit(1)
-  );
-  
-  const snap = await getDocs(q);
-  if (snap.empty) {
-    return null;
-  }
-  
-  const doc = snap.docs[0];
-  const data = doc.data();
+// ─── User Profile (Firebase Auth UID → Firestore doc) ─────────
+export async function getUserProfile(uid: string): Promise<User | null> {
+  const snap = await getDoc(doc(db, 'users', uid));
+  if (!snap.exists()) return null;
+  const data = snap.data();
   return {
-    username: data.username,
+    uid: snap.id,
+    email: data.email,
     role: data.role,
     name: data.name
   };
 }
 
-export async function seedDefaultUsers(): Promise<void> {
-  const snap = await getDocs(usersCol);
-  
-  // Only seed if collection is completely empty
-  if (snap.empty) {
-    const batch = writeBatch(db);
-    
-    // Default Admin
-    const adminRef = doc(db, 'users', 'admin');
-    batch.set(adminRef, {
-      username: 'admin',
-      password: 'admin123',
-      role: 'admin',
-      name: 'Administrator'
-    });
+export async function createUserProfile(uid: string, email: string, role: 'admin' | 'kasir', name: string): Promise<void> {
+  await setDoc(doc(db, 'users', uid), { email, role, name });
+}
 
-    // Default Kasir
-    const kasirRef = doc(db, 'users', 'kasir');
-    batch.set(kasirRef, {
-      username: 'kasir',
-      password: 'kasir123',
-      role: 'kasir',
-      name: 'Petugas Kasir'
-    });
-
-    await batch.commit();
-    console.log("Default users seeded to Firestore.");
-  }
+export async function isAdminExists(): Promise<boolean> {
+  const q = query(usersCol, where('role', '==', 'admin'), limit(1));
+  const snap = await getDocs(q);
+  return !snap.empty;
 }
 
 // ─── Products ───────────────────────────────────────────────────

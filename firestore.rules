@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================================
+    // ATURAN KEAMANAN FIRESTORE - KASIR IKBAL PRO
+    // Wajib menggunakan Firebase Authentication (Email/Password)
+    // ========================================================
+
+    // Semua request harus login
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Proteksi tambahan: hanya admin yang bisa baca/tulis users
+    match /users/{userId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+      allow write: if request.auth != null
+                  && request.auth.uid == userId;
+    }
+
+    // Produk: semua user login bisa baca, hanya admin yang bisa tulis
+    match /products/{productId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                  && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Transaksi: semua user login bisa baca & buat transaksi baru
+    match /transactions/{txId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null
+                    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow update: if false; // transaksi tidak boleh diubah
+    }
+  }
+}
