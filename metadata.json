@@ -1,0 +1,6 @@
+{
+  "name": "Kasir IKBAL",
+  "description": "Aplikasi kasir modern untuk pencatatan transaksi penjualan, manajemen stok barang secara real-time, dan monitor performa finansial harian secara efisien.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
