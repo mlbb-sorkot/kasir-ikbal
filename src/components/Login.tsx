@@ -22,6 +22,11 @@ export default function Login({ onLogin }: LoginProps) {
 
   useEffect(() => {
     (async () => {
+      if (import.meta.env.PROD) {
+        setMode('login');
+        return;
+      }
+
       try {
         const snap = await getDocs(collection(db, 'users'));
         if (snap.empty) {
@@ -106,7 +111,7 @@ export default function Login({ onLogin }: LoginProps) {
       if (code === 'auth/email-already-in-use') {
         setError('Username ini sudah terdaftar. Silakan login.');
       } else if (code === 'auth/weak-password') {
-        setError('Password terlalu lemah. Minimal 6 karakter.');
+        setError('Password terlalu lemah. Minimal 8 karakter.');
       } else if (code === 'auth/operation-not-allowed') {
         setError('Login dengan Email/Password belum diaktifkan di Firebase Console > Authentication.');
       } else {
@@ -202,9 +207,9 @@ export default function Login({ onLogin }: LoginProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-neutral-900/50 border border-neutral-700 text-white rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all placeholder:text-neutral-600"
-                placeholder={mode === 'migrate' || mode === 'setup' ? 'Buat password baru (min 6 karakter)' : 'Masukkan password'}
+                placeholder={mode === 'migrate' || mode === 'setup' ? 'Buat password baru (min 8 karakter)' : 'Masukkan password'}
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
           </div>
