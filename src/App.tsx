@@ -23,6 +23,7 @@ import { INITIAL_PRODUCTS, INITIAL_TRANSACTIONS } from './initialData';
 import {
   addProduct,
   updateProduct,
+  updateProductStock,
   deleteProduct,
   addTransaction,
   deleteTransaction,
@@ -156,18 +157,16 @@ export default function App() {
   const handleDeductProductStock = async (productId: string, qtySold: number) => {
     const product = products.find(p => p.id === productId);
     if (product) {
-      const updatedProduct = { ...product, stock: Math.max(0, product.stock - qtySold) };
-      await updateProduct(updatedProduct);
-      setProducts(prev => prev.map(p => p.id === productId ? updatedProduct : p));
+      const newStock = Math.max(0, product.stock - qtySold);
+      await updateProductStock(productId, newStock);
     }
   };
 
   const handleRestockProduct = async (productId: string, qtyAdded: number) => {
     const product = products.find(p => p.id === productId);
     if (product) {
-      const updatedProduct = { ...product, stock: product.stock + qtyAdded };
-      await updateProduct(updatedProduct);
-      setProducts(prev => prev.map(p => p.id === productId ? updatedProduct : p));
+      const newStock = product.stock + qtyAdded;
+      await updateProductStock(productId, newStock);
     }
   };
 

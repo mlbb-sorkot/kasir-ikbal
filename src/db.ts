@@ -60,6 +60,10 @@ export async function deleteProduct(id: string): Promise<void> {
   await deleteDoc(doc(db, 'products', id));
 }
 
+export async function updateProductStock(productId: string, stock: number): Promise<void> {
+  await setDoc(doc(db, 'products', productId), { stock }, { merge: true });
+}
+
 export function subscribeProducts(callback: (products: Product[]) => void): () => void {
   return onSnapshot(productsCol, (snap) => {
     const products = snap.docs.map(d => ({ ...d.data(), id: d.id } as Product));
