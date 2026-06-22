@@ -13,7 +13,8 @@ import {
   X,
   Maximize,
   Minimize,
-  Users
+  Users,
+  LogOut
 } from 'lucide-react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase';
@@ -293,12 +294,6 @@ export default function App() {
               <p className="text-xs font-bold text-slate-700 leading-none">{currentUser.name}</p>
               <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-0.5">{currentUser.role}</p>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="text-[10px] bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 px-3 py-2 rounded-xl font-bold transition-colors uppercase tracking-wider"
-            >
-              Keluar
-            </button>
           </div>
         </div>
 
@@ -443,6 +438,17 @@ export default function App() {
               </>
             )}
 
+            {/* Logout button */}
+            <div className="mt-2 pt-2 border-t border-slate-700/60">
+              <button
+                onClick={handleLogout}
+                title={isSidebarCollapsed ? "Keluar" : ""}
+                className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink text-slate-400 hover:text-red-400 bg-transparent hover:bg-red-900/20`}
+              >
+                <LogOut size={16} className="text-slate-500 group-hover:text-red-400" />
+                <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Keluar</span>
+              </button>
+            </div>
           </nav>
 
           {/* Quick info status block */}
