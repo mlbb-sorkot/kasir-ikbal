@@ -49,7 +49,7 @@ export default function POSTerminal({
     const existing = cart.find(item => item.product.id === product.id);
     const existingQty = existing ? existing.quantity : 0;
 
-    if (existingQty >= product.stock) return;
+    if (existingQty >= (product.stock ?? 0)) return;
 
     if (existing) {
       setCart(prev => prev.map(item => 
@@ -72,7 +72,7 @@ export default function POSTerminal({
       return;
     }
 
-    if (newQty > item.product.stock) return;
+    if (newQty > (item.product.stock ?? 0)) return;
 
     setCart(prev => prev.map(c => 
       c.product.id === productId ? { ...c, quantity: newQty } : c
@@ -247,9 +247,9 @@ export default function POSTerminal({
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[560px] overflow-y-auto pr-1">
           {filteredProducts.map(product => {
             const cartQty = cart.find(c => c.product.id === product.id)?.quantity || 0;
-            const remainingStock = product.stock - cartQty;
+            const remainingStock = Math.max(0, (product.stock ?? 0) - cartQty);
             const isOutOfStock = remainingStock <= 0;
-            const isLowStock = remainingStock <= product.minStock && remainingStock > 0;
+            const isLowStock = remainingStock <= (product.minStock ?? 0) && remainingStock > 0;
 
             return (
               <div 
