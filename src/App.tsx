@@ -250,6 +250,7 @@ export default function App() {
   }
 
   const changeTab = (tab: any) => {
+    if (tab === 'pos' && currentUser.role === 'admin') return;
     setActiveTab(tab);
     setIsMobileMenuOpen(false); // Auto close mobile menu after clicking
   };
@@ -498,7 +499,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'pos' && (
+          {activeTab === 'pos' && currentUser.role !== 'admin' && (
             <POSTerminal
               products={products}
               transactions={transactions}
