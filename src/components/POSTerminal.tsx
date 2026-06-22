@@ -49,10 +49,7 @@ export default function POSTerminal({
     const existing = cart.find(item => item.product.id === product.id);
     const existingQty = existing ? existing.quantity : 0;
 
-    if (existingQty >= product.stock) {
-      alert(`Maaf, stok ${product.name} telah mencapai batas maksimum ketersediaan (${product.stock} ${product.unit}).`);
-      return;
-    }
+    if (existingQty >= product.stock) return;
 
     if (existing) {
       setCart(prev => prev.map(item => 
@@ -75,10 +72,7 @@ export default function POSTerminal({
       return;
     }
 
-    if (newQty > item.product.stock) {
-      alert(`Jumlah melebihi ketersediaan stok (${item.product.stock} ${item.product.unit}).`);
-      return;
-    }
+    if (newQty > item.product.stock) return;
 
     setCart(prev => prev.map(c => 
       c.product.id === productId ? { ...c, quantity: newQty } : c
@@ -252,63 +246,73 @@ export default function POSTerminal({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[560px] overflow-y-auto pr-1">
           {filteredProducts.map(product => {
-            const isOutOfStock = product.stock <= 0;
-            const isLowStock = product.stock <= product.minStock;
-
-            // Check if there is already an item in the cart to render badge count
             const cartQty = cart.find(c => c.product.id === product.id)?.quantity || 0;
+            const remainingStock = product.stock - cartQty;
+            const isOutOfStock = remainingStock <= 0;
+            const isLowStock = remainingStock <= product.minStock && remainingStock > 0;
 
             return (
               <div 
                 key={product.id}
                 onClick={() => !isOutOfStock && handleAddToCart(product)}
-                className={`group bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden relative flex flex-col justify-between ${
-                  isOutOfStock ? 'opacity-65 border-slate-250' : 
-                  cartQty > 0 ? 'border-indigo-600 ring-1 ring-indigo-600' : 'border-slate-200/85 hover:border-indigo-500'
+                className={`group bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden relative flex flex-col justify-between ${
+                  isOutOfStock ? 'border-red-300 bg-red-50 cursor-default' : 
+                  cartQty > 0 ? 'border-indigo-600 ring-1 ring-indigo-600 cursor-pointer' : 'border-slate-200/85 hover:border-indigo-500 cursor-pointer'
                 }`}
               >
-                {cartQty > 0 && (
+                {cartQty > 0 && !isOutOfStock && (
                   <span className="absolute top-2 right-2 bg-indigo-600 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-xs">
                     {cartQty}
                   </span>
                 )}
 
+                {isOutOfStock && (
+                  <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-xs">
+                    Habis
+                  </span>
+                )}
+
                 <div className="p-3.5 space-y-2.5 flex-1 flex flex-col justify-between">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase font-mono block">
+                    <span className={`text-[10px] font-bold tracking-wider uppercase font-mono block ${
+                      isOutOfStock ? 'text-red-300' : 'text-slate-400'
+                    }`}>
                       {product.sku}
                     </span>
-                    <h4 className="text-xs font-bold text-slate-800 line-clamp-2 h-8 leading-tight">
+                    <h4 className={`text-xs font-bold line-clamp-2 h-8 leading-tight ${
+                      isOutOfStock ? 'text-red-400' : 'text-slate-800'
+                    }`}>
                       {product.name}
                     </h4>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs font-black text-indigo-600 font-mono">
+                  <div className={`pt-2 border-t flex items-center justify-between ${isOutOfStock ? 'border-red-200' : 'border-slate-100'}`}>
+                    <span className={`text-xs font-black font-mono ${
+                      isOutOfStock ? 'text-red-400' : 'text-indigo-600'
+                    }`}>
                       {formatRupiah(product.sellPrice)}
                     </span>
                     <div className="text-right">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        isOutOfStock ? 'bg-slate-150 text-slate-400' :
+                        isOutOfStock ? 'bg-red-100 text-red-600' :
                         isLowStock ? 'bg-amber-100 text-amber-800' :
                         'bg-slate-100 text-slate-600'
                       }`}>
-                        {isOutOfStock ? 'Habis' : `Stok: ${product.stock}`}
+                        {isOutOfStock ? 'Stok Habis' : `Stok: ${remainingStock}`}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Direct quick click button */}
                 <button
                   disabled={isOutOfStock}
                   className={`w-full py-2 text-center text-[11px] font-bold border-t transition-colors ${
-                    isOutOfStock ? 'bg-slate-100 text-slate-400 border-slate-200' :
+                    isOutOfStock ? 'bg-red-100 text-red-400 border-red-200' :
                     cartQty > 0 ? 'bg-indigo-600 text-white border-indigo-600 group-hover:bg-indigo-700' :
                     'bg-slate-50 text-slate-600 border-slate-100 group-hover:bg-indigo-50 group-hover:text-indigo-600'
                   }`}
                 >
-                  {isOutOfStock ? 'STOK KOSONG' : cartQty > 0 ? 'TAMBAH LAGI' : 'TAMBAH KE KASIR'}
+                  {isOutOfStock ? 'STOK HABIS' : cartQty > 0 ? 'TAMBAH LAGI' : 'TAMBAH KE KASIR'}
                 </button>
               </div>
             );
