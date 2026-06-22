@@ -3,6 +3,7 @@ import { Search, Eye, Printer, Trash2, FileText, X, CalendarDays, TrendingUp } f
 import { Transaction } from '../types';
 import { formatRupiah, formatDate } from '../utils';
 import Tooltip from './Tooltip';
+import Modal from './Modal';
 
 interface TransactionsHistoryProps {
   transactions: Transaction[];
@@ -31,6 +32,7 @@ export default function TransactionsHistory({
   const [filterMethod, setFilterMethod] = useState<string>('all');
   const [viewingReceipt, setViewingReceipt] = useState<Transaction | null>(null);
   const [historyView, setHistoryView] = useState<HistoryView>('semua');
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; description: string; onConfirm: () => void } | null>(null);
 
   // Base filtered (for Kasir's today-only view)
   const baseTransactions = useMemo(() => {
@@ -99,9 +101,11 @@ export default function TransactionsHistory({
 
   const handleDeleteConfirm = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm(`Apakah Anda yakin ingin membatalkan transaksi "${id}"? Stok tidak akan otomatis dikembalikan.`)) {
-      onDeleteTransaction(id);
-    }
+    setConfirmDialog({
+      title: 'Konfirmasi',
+      description: `Apakah Anda yakin ingin membatalkan transaksi "${id}"? Stok tidak akan otomatis dikembalikan.`,
+      onConfirm: () => { setConfirmDialog(null); onDeleteTransaction(id); },
+    });
   };
 
   return (
@@ -474,6 +478,19 @@ export default function TransactionsHistory({
             </div>
           </div>
         </div>
+      )}
+
+      {confirmDialog && (
+        <Modal
+          open={true}
+          onClose={() => setConfirmDialog(null)}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          actions={[
+            { label: 'Batal', onClick: () => setConfirmDialog(null), variant: 'ghost' },
+            { label: 'Ya, Lanjutkan', onClick: confirmDialog.onConfirm, variant: 'danger' },
+          ]}
+        />
       )}
     </div>
   );

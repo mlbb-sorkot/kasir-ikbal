@@ -1,7 +1,8 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { TrendingUp, Coins, ShoppingCart, Award, HardDriveDownload, Download, Trash2, RotateCcw, AlertTriangle, FileSpreadsheet } from 'lucide-react';
 import { Product, Transaction } from '../types';
 import { formatRupiah } from '../utils';
+import Modal from './Modal';
 
 interface SalesAnalyticsProps {
   products: Product[];
@@ -17,6 +18,7 @@ export default function SalesAnalytics({
   onImportDatabase,
 }: SalesAnalyticsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; description: string; onConfirm: () => void } | null>(null);
 
   // 1. Overall aggregated statistics (Full history)
   const fullStats = useMemo(() => {
@@ -115,16 +117,15 @@ export default function SalesAnalytics({
       try {
         const parsed = JSON.parse(event.target?.result as string);
         if (parsed.products && parsed.transactions) {
-          const confirmImport = window.confirm(
-            `Data backup valid terdeteksi!\n` +
-            `- Jumlah produk: ${parsed.products.length}\n` +
-            `- Jumlah transaksi: ${parsed.transactions.length}\n\n` +
-            `Apakah Anda yakin ingin menimpa database kasir saat ini dengan data backup ini?`
-          );
-          if (confirmImport) {
-            onImportDatabase(parsed.products, parsed.transactions);
-            alert('Database kasir berhasil dipulihkan dari data backup!');
-          }
+          setConfirmDialog({
+            title: 'Konfirmasi',
+            description: `Data backup valid terdeteksi! Jumlah produk: ${parsed.products.length}, Jumlah transaksi: ${parsed.transactions.length}. Apakah Anda yakin ingin menimpa database kasir saat ini dengan data backup ini?`,
+            onConfirm: () => {
+              setConfirmDialog(null);
+              onImportDatabase(parsed.products, parsed.transactions);
+              alert('Database kasir berhasil dipulihkan dari data backup!');
+            },
+          });
         } else {
           alert('Format berkas backup json tidak cocok dengan skema Kasir IKBAL.');
         }
@@ -138,15 +139,15 @@ export default function SalesAnalytics({
   };
 
   const handleResetClick = () => {
-    const confirmWipe = window.confirm(
-      '⚠️ PERINGATAN KERAS! ⚠️\n' +
-      'Tindakan ini akan menghapus SELURUH produk kustom dan seluruh riwayat transaksi penjualan.\n\n' +
-      'Apakah Anda ingin melanjutkan dan mereset kasir ke setelan pabrik (seeding default)?'
-    );
-    if (confirmWipe) {
-      onResetDatabase();
-      alert('Kasir didefaultkan kembali!');
-    }
+    setConfirmDialog({
+      title: 'Konfirmasi',
+      description: '⚠️ PERINGATAN KERAS! ⚠️ Tindakan ini akan menghapus SELURUH produk kustom dan seluruh riwayat transaksi penjualan. Apakah Anda ingin melanjutkan dan mereset kasir ke setelan pabrik (seeding default)?',
+      onConfirm: () => {
+        setConfirmDialog(null);
+        onResetDatabase();
+        alert('Kasir didefaultkan kembali!');
+      },
+    });
   };
 
   return (
@@ -337,6 +338,19 @@ export default function SalesAnalytics({
           </div>
         </div>
       </div>
+
+      {confirmDialog && (
+        <Modal
+          open={true}
+          onClose={() => setConfirmDialog(null)}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          actions={[
+            { label: 'Batal', onClick: () => setConfirmDialog(null), variant: 'ghost' },
+            { label: 'Ya, Lanjutkan', onClick: confirmDialog.onConfirm, variant: 'danger' },
+          ]}
+        />
+      )}
     </div>
   );
 }

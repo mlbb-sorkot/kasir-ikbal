@@ -6,6 +6,7 @@ import { db, auth } from '../firebase';
 import { User } from '../types';
 import { createUserProfile } from '../db';
 import Tooltip from './Tooltip';
+import Modal from './Modal';
 
 interface UserWithDocId extends User {
   docId: string;
@@ -20,6 +21,7 @@ export default function UserManager() {
   const [newName, setNewName] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; description: string; onConfirm: () => void } | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -74,13 +76,21 @@ export default function UserManager() {
   };
 
   const handleDelete = async (u: UserWithDocId) => {
-    if (!window.confirm(`Hapus user "${u.name}" (${u.role})?`)) return;
-    try {
-      await deleteDoc(doc(db, 'users', u.docId));
-      await fetchUsers();
-    } catch {
-      setError('Gagal menghapus user.');
-    }
+    setConfirmDialog({
+      title: 'Konfirmasi',
+      description: `Hapus user "${u.name}" (${u.role})?`,
+      onConfirm: () => {
+        setConfirmDialog(null);
+        (async () => {
+          try {
+            await deleteDoc(doc(db, 'users', u.docId));
+            await fetchUsers();
+          } catch {
+            setError('Gagal menghapus user.');
+          }
+        })();
+      },
+    });
   };
 
   if (loading) {
@@ -209,6 +219,19 @@ export default function UserManager() {
           <p className="text-center text-xs text-slate-400 py-6">Belum ada user.</p>
         )}
       </div>
+
+      {confirmDialog && (
+        <Modal
+          open={true}
+          onClose={() => setConfirmDialog(null)}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          actions={[
+            { label: 'Batal', onClick: () => setConfirmDialog(null), variant: 'ghost' },
+            { label: 'Ya, Lanjutkan', onClick: confirmDialog.onConfirm, variant: 'danger' },
+          ]}
+        />
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Product, CartItem, PaymentMethod, Transaction } from '../types';
 import { formatRupiah, generateTransactionId } from '../utils';
 import { CATEGORIES } from '../initialData';
 import Tooltip from './Tooltip';
+import Modal from './Modal';
 
 interface POSTerminalProps {
   products: Product[];
@@ -28,6 +29,7 @@ export default function POSTerminal({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [amountPaid, setAmountPaid] = useState<number>(0);
   const [customAmountPaid, setCustomAmountPaid] = useState<string>('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Post-transaction receipt modal state
   const [activeReceipt, setActiveReceipt] = useState<Transaction | null>(null);
@@ -88,11 +90,14 @@ export default function POSTerminal({
   };
 
   const handleClearCart = () => {
-    if (window.confirm('Bersihkan keranjang belanja?')) {
-      setCart([]);
-      setCustomAmountPaid('');
-      setAmountPaid(0);
-    }
+    setShowClearConfirm(true);
+  };
+
+  const confirmClearCart = () => {
+    setCart([]);
+    setCustomAmountPaid('');
+    setAmountPaid(0);
+    setShowClearConfirm(false);
   };
 
   // Shopping Cart calculations
@@ -636,6 +641,17 @@ export default function POSTerminal({
           </div>
         </div>
       )}
+
+      <Modal
+        open={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        title="Kosongkan Keranjang?"
+        description="Semua item di keranjang belanja akan dihapus dan tidak dapat dikembalikan."
+        actions={[
+          { label: 'Batal', onClick: () => setShowClearConfirm(false), variant: 'ghost' },
+          { label: 'Ya, Kosongkan', onClick: confirmClearCart, variant: 'danger' },
+        ]}
+      />
     </div>
   );
 }

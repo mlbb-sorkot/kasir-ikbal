@@ -4,6 +4,7 @@ import { Product } from '../types';
 import { CATEGORIES } from '../initialData';
 import { formatRupiah, generateSKU } from '../utils';
 import Tooltip from './Tooltip';
+import Modal from './Modal';
 
 interface InventoryManagerProps {
   products: Product[];
@@ -43,6 +44,9 @@ export default function InventoryManager({
   const [formStock, setFormStock] = useState<number>(0);
   const [formMinStock, setFormMinStock] = useState<number>(5);
   const [formUnit, setFormUnit] = useState('pcs');
+
+  // Confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; description: string; onConfirm: () => void } | null>(null);
 
   // Quick addition of stock in table
   const [quickAddQty, setQuickAddQty] = useState<{ [key: string]: number }>({});
@@ -92,12 +96,17 @@ export default function InventoryManager({
     }
 
     if (formSellPrice < formBuyPrice) {
-      const confirmLoss = window.confirm(
-        'Perhatian: Harga jual lebih rendah dari harga beli (rugi). Tetap ingin menyimpan?'
-      );
-      if (!confirmLoss) return;
+      setConfirmDialog({
+        title: 'Konfirmasi',
+        description: 'Perhatian: Harga jual lebih rendah dari harga beli (rugi). Tetap ingin menyimpan?',
+        onConfirm: () => { setConfirmDialog(null); executeSaveProduct(); },
+      });
+      return;
     }
+    executeSaveProduct();
+  };
 
+  const executeSaveProduct = () => {
     // Determine final SKU
     const finalSku = formSku.trim() || generateSKU(formCategory);
 
@@ -142,9 +151,11 @@ export default function InventoryManager({
   };
 
   const handleDeleteClick = (p: Product) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus produk "${p.name}" dari sistem?`)) {
-      onDeleteProduct(p.id);
-    }
+    setConfirmDialog({
+      title: 'Konfirmasi',
+      description: `Apakah Anda yakin ingin menghapus produk "${p.name}" dari sistem?`,
+      onConfirm: () => { setConfirmDialog(null); onDeleteProduct(p.id); },
+    });
   };
 
   const handleQuickAddStock = (p: Product) => {
@@ -596,6 +607,19 @@ export default function InventoryManager({
             </form>
           </div>
         </div>
+      )}
+
+      {confirmDialog && (
+        <Modal
+          open={true}
+          onClose={() => setConfirmDialog(null)}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          actions={[
+            { label: 'Batal', onClick: () => setConfirmDialog(null), variant: 'ghost' },
+            { label: 'Ya, Lanjutkan', onClick: confirmDialog.onConfirm, variant: 'danger' },
+          ]}
+        />
       )}
     </div>
   );
