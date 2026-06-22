@@ -32,6 +32,7 @@ import {
   getUserProfile,
 } from './db';
 import Login from './components/Login';
+import Tooltip from './components/Tooltip';
 
 import DashboardOverview from './components/DashboardOverview';
 import POSTerminal from './components/POSTerminal';
@@ -281,13 +282,14 @@ export default function App() {
             <span className="text-[10px] font-mono tracking-tight font-bold">{indonesianDateTimeStr()}</span>
           </div>
 
-          <button
-            onClick={toggleBrowserFullscreen}
-            title={isBrowserFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
-            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-indigo-100 hover:text-indigo-600 transition-colors"
-          >
-            {isBrowserFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
-          </button>
+          <Tooltip text={isBrowserFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}>
+            <button
+              onClick={toggleBrowserFullscreen}
+              className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-indigo-100 hover:text-indigo-600 transition-colors"
+            >
+              {isBrowserFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
+            </button>
+          </Tooltip>
 
           <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
             <div className="text-right hidden sm:block">
@@ -318,13 +320,14 @@ export default function App() {
             </p>
 
             {/* Desktop Toggle */}
-            <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="hidden lg:flex p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={isSidebarCollapsed ? "Perluas Menu" : "Kecilkan Menu"}
-            >
-              {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-            </button>
+            <Tooltip text={isSidebarCollapsed ? "Perluas Menu" : "Kecilkan Menu"}>
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="hidden lg:flex p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+              </button>
+            </Tooltip>
 
             {/* Mobile Hamburger Toggle */}
             <button
@@ -339,115 +342,123 @@ export default function App() {
           <nav className={`${isMobileMenuOpen ? 'flex' : 'hidden'} lg:flex flex-col gap-1 pb-2 lg:pb-0`}>
             
             {currentUser.role === 'admin' && (
-              <button
-                onClick={() => changeTab('dashboard')}
-                title={isSidebarCollapsed ? "Dashboard" : ""}
-                className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
-                  activeTab === 'dashboard'
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                    : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
-                }`}
-              >
-                <LayoutDashboard size={16} className={activeTab === 'dashboard' ? 'text-white shadow-indigo-600/20' : 'text-slate-500 group-hover:text-slate-300'} />
-                <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Dashboard</span>
-              </button>
+              <Tooltip text="Dashboard" disabled={!isSidebarCollapsed}>
+                <button
+                  onClick={() => changeTab('dashboard')}
+                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                    activeTab === 'dashboard'
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                  }`}
+                >
+                  <LayoutDashboard size={16} className={activeTab === 'dashboard' ? 'text-white shadow-indigo-600/20' : 'text-slate-500 group-hover:text-slate-300'} />
+                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Dashboard</span>
+                </button>
+              </Tooltip>
             )}
 
             {currentUser.role === 'kasir' && (
               <>
-                <button
-                  onClick={() => changeTab('pos')}
-                  title={isSidebarCollapsed ? "Kasir Terminal" : ""}
-                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
-                    activeTab === 'pos'
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
-                  }`}
-                >
-                  <ShoppingCart size={16} className={activeTab === 'pos' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
-                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Kasir Terminal</span>
-                </button>
-                <button
-                  onClick={() => changeTab('history-today')}
-                  title={isSidebarCollapsed ? "Riwayat Hari Ini" : ""}
-                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
-                    activeTab === 'history-today'
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
-                  }`}
-                >
-                  <History size={16} className={activeTab === 'history-today' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
-                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Riwayat Hari Ini</span>
-                </button>
+                <Tooltip text="Kasir Terminal" disabled={!isSidebarCollapsed}>
+                  <button
+                    onClick={() => changeTab('pos')}
+                    className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                      activeTab === 'pos'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                        : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                    }`}
+                  >
+                    <ShoppingCart size={16} className={activeTab === 'pos' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
+                    <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Kasir Terminal</span>
+                  </button>
+                </Tooltip>
+                <Tooltip text="Riwayat Hari Ini" disabled={!isSidebarCollapsed}>
+                  <button
+                    onClick={() => changeTab('history-today')}
+                    className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                      activeTab === 'history-today'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                        : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                    }`}
+                  >
+                    <History size={16} className={activeTab === 'history-today' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
+                    <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Riwayat Hari Ini</span>
+                  </button>
+                </Tooltip>
               </>
             )}
 
             {currentUser.role === 'admin' && (
               <>
-                <button
-                onClick={() => changeTab('stock')}
-                title={isSidebarCollapsed ? "Stok Produk" : ""}
-                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
-                    activeTab === 'stock'
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
-                  }`}
-                >
-                  <Boxes size={16} className={activeTab === 'stock' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
-                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Kelola Stok Barang</span>
-                </button>
+                <Tooltip text="Stok Produk" disabled={!isSidebarCollapsed}>
+                  <button
+                  onClick={() => changeTab('stock')}
+                    className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                      activeTab === 'stock'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                        : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                    }`}
+                  >
+                    <Boxes size={16} className={activeTab === 'stock' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
+                    <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Kelola Stok Barang</span>
+                  </button>
+                </Tooltip>
 
-                <button
-                onClick={() => changeTab('history')}
-                title={isSidebarCollapsed ? "Riwayat Penjualan" : ""}
-                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
-                    activeTab === 'history'
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
-                  }`}
-                >
-                  <History size={16} className={activeTab === 'history' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
-                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Riwayat Penjualan</span>
-                </button>
+                <Tooltip text="Riwayat Penjualan" disabled={!isSidebarCollapsed}>
+                  <button
+                  onClick={() => changeTab('history')}
+                    className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                      activeTab === 'history'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                        : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                    }`}
+                  >
+                    <History size={16} className={activeTab === 'history' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
+                    <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Riwayat Penjualan</span>
+                  </button>
+                </Tooltip>
 
-                <button
-                  onClick={() => changeTab('users')}
-                  title={isSidebarCollapsed ? "Pengguna" : ""}
-                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
-                    activeTab === 'users'
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
-                  }`}
-                >
-                  <Users size={16} className={activeTab === 'users' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
-                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Kelola Pengguna</span>
-                </button>
+                <Tooltip text="Pengguna" disabled={!isSidebarCollapsed}>
+                  <button
+                    onClick={() => changeTab('users')}
+                    className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                      activeTab === 'users'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                        : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                    }`}
+                  >
+                    <Users size={16} className={activeTab === 'users' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
+                    <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Kelola Pengguna</span>
+                  </button>
+                </Tooltip>
 
-                <button
-                  onClick={() => setActiveTab('analytics')}
-                  title={isSidebarCollapsed ? "Utilitas & Analitik" : ""}
-                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
-                    activeTab === 'analytics'
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
-                  }`}
-                >
-                  <TrendingUp size={16} className={activeTab === 'analytics' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
-                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Utilitas & Analitik</span>
-                </button>
+                <Tooltip text="Utilitas & Analitik" disabled={!isSidebarCollapsed}>
+                  <button
+                    onClick={() => setActiveTab('analytics')}
+                    className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink ${
+                      activeTab === 'analytics'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                        : 'text-slate-400 hover:text-white bg-transparent hover:bg-slate-800'
+                    }`}
+                  >
+                    <TrendingUp size={16} className={activeTab === 'analytics' ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'} />
+                    <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Utilitas & Analitik</span>
+                  </button>
+                </Tooltip>
               </>
             )}
 
             {/* Logout button */}
             <div className="mt-2 pt-2 border-t border-slate-700/60">
-              <button
-                onClick={handleLogout}
-                title={isSidebarCollapsed ? "Keluar" : ""}
-                className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink text-slate-400 hover:text-red-400 bg-transparent hover:bg-red-900/20`}
-              >
-                <LogOut size={16} className="text-slate-500 group-hover:text-red-400" />
-                <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Keluar</span>
-              </button>
+              <Tooltip text="Keluar" disabled={!isSidebarCollapsed}>
+                <button
+                  onClick={handleLogout}
+                  className={`w-full ${isSidebarCollapsed ? 'lg:px-0 lg:justify-center' : 'px-4'} py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 justify-start cursor-pointer group shrink-0 lg:shrink text-slate-400 hover:text-red-400 bg-transparent hover:bg-red-900/20`}
+                >
+                  <LogOut size={16} className="text-slate-500 group-hover:text-red-400" />
+                  <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Keluar</span>
+                </button>
+              </Tooltip>
             </div>
           </nav>
 

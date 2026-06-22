@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Eye, Printer, Trash2, FileText, X, CalendarDays, TrendingUp } from 'lucide-react';
 import { Transaction } from '../types';
 import { formatRupiah, formatDate } from '../utils';
+import Tooltip from './Tooltip';
 
 interface TransactionsHistoryProps {
   transactions: Transaction[];
@@ -324,8 +325,10 @@ export default function TransactionsHistory({
                             {t.id}
                           </td>
                           <td className="p-4 uppercase font-semibold text-neutral-600">{t.cashierName}</td>
-                          <td className="p-4 font-normal text-neutral-500 max-w-[240px] truncate" title={itemsSummary}>
-                            {itemsSummary}
+                          <td className="p-4 font-normal text-neutral-500 max-w-[240px] truncate">
+                            <Tooltip text={itemsSummary}>
+                              <span>{itemsSummary}</span>
+                            </Tooltip>
                           </td>
                           <td className="p-4 text-center">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
@@ -348,13 +351,14 @@ export default function TransactionsHistory({
                                 <Eye size={14} />
                               </button>
                               {allowDelete && (
-                                <button
-                                  onClick={(e) => handleDeleteConfirm(t.id, e)}
-                                  className="p-1 text-neutral-300 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-                                  title="Batalkan Transaksi"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
+                                <Tooltip text="Batalkan Transaksi">
+                                  <button
+                                    onClick={(e) => handleDeleteConfirm(t.id, e)}
+                                    className="p-1 text-neutral-300 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </Tooltip>
                               )}
                             </div>
                           </td>

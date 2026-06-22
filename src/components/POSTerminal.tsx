@@ -3,6 +3,7 @@ import { Search, ShoppingCart, Trash2, Tag, RefreshCw, Layers, Check, CheckCircl
 import { Product, CartItem, PaymentMethod, Transaction } from '../types';
 import { formatRupiah, generateTransactionId } from '../utils';
 import { CATEGORIES } from '../initialData';
+import Tooltip from './Tooltip';
 
 interface POSTerminalProps {
   products: Product[];
@@ -330,13 +331,14 @@ export default function POSTerminal({
           </div>
 
           {cart.length > 0 && (
-            <button
-              onClick={handleClearCart}
-              className="text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
-              title="Kosongkan Keranjang"
-            >
-              <Trash2 size={16} />
-            </button>
+            <Tooltip text="Kosongkan Keranjang">
+              <button
+                onClick={handleClearCart}
+                className="text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+              >
+                <Trash2 size={16} />
+              </button>
+            </Tooltip>
           )}
         </div>
 

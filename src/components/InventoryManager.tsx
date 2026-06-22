@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash2, ArrowUpDown, Search, Percent, Eye, AlertTriangle, 
 import { Product } from '../types';
 import { CATEGORIES } from '../initialData';
 import { formatRupiah, generateSKU } from '../utils';
+import Tooltip from './Tooltip';
 
 interface InventoryManagerProps {
   products: Product[];
@@ -335,9 +336,11 @@ export default function InventoryManager({
 
                       {/* Margins */}
                       <td className="p-4 text-center">
-                        <span className={`text-[11px] font-semibold text-neutral-500`} title="Keuntungan Margin">
-                          {formatRupiah(markup)} <span className="text-[10px] text-neutral-400">({markupPercent.toFixed(0)}%)</span>
-                        </span>
+                        <Tooltip text="Keuntungan Margin">
+                          <span className={`text-[11px] font-semibold text-neutral-500`}>
+                            {formatRupiah(markup)} <span className="text-[10px] text-neutral-400">({markupPercent.toFixed(0)}%)</span>
+                          </span>
+                        </Tooltip>
                       </td>
 
                       {/* Stock Level Counter */}
@@ -367,33 +370,36 @@ export default function InventoryManager({
                               }));
                             }}
                           />
-                          <button
-                            onClick={() => handleQuickAddStock(p)}
-                            className="bg-neutral-100 hover:bg-emerald-700 hover:text-white border border-neutral-300 hover:border-emerald-700 text-neutral-600 p-1.5 rounded transition-colors cursor-pointer"
-                            title="Konfirmasi Tambah"
-                          >
-                            <Plus size={12} />
-                          </button>
+                          <Tooltip text="Konfirmasi Tambah">
+                            <button
+                              onClick={() => handleQuickAddStock(p)}
+                              className="bg-neutral-100 hover:bg-emerald-700 hover:text-white border border-neutral-300 hover:border-emerald-700 text-neutral-600 p-1.5 rounded transition-colors cursor-pointer"
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </Tooltip>
                         </div>
                       </td>
 
                       {/* Row Actions */}
                       <td className="p-4 col-span-2 text-right">
                         <div className="flex justify-end gap-1.5">
-                          <button
-                            onClick={() => handleOpenEditModal(p)}
-                            className="p-1.5 text-neutral-400 hover:text-neutral-800 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg transition-colors cursor-pointer"
-                            title="Edit Data Produk"
-                          >
-                            <Edit2 size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(p)}
-                            className="p-1.5 text-neutral-400 hover:text-rose-600 bg-white hover:bg-rose-50 border border-neutral-200 hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
-                            title="Hapus Produk"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                          <Tooltip text="Edit Data Produk">
+                            <button
+                              onClick={() => handleOpenEditModal(p)}
+                              className="p-1.5 text-neutral-400 hover:text-neutral-800 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Edit2 size={13} />
+                            </button>
+                          </Tooltip>
+                          <Tooltip text="Hapus Produk">
+                            <button
+                              onClick={() => handleDeleteClick(p)}
+                              className="p-1.5 text-neutral-400 hover:text-rose-600 bg-white hover:bg-rose-50 border border-neutral-200 hover:border-rose-200 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </Tooltip>
                         </div>
                       </td>
                     </tr>

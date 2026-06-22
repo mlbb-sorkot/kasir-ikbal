@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { User } from '../types';
 import { createUserProfile } from '../db';
+import Tooltip from './Tooltip';
 
 interface UserWithDocId extends User {
   docId: string;
@@ -190,13 +191,14 @@ export default function UserManager() {
                 </td>
                 <td className="py-3 text-right">
                   {u.role !== 'admin' && (
-                    <button
-                      onClick={() => handleDelete(u)}
-                      className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-1"
-                      title="Hapus user"
-                    >
-                      <Ban size={14} />
-                    </button>
+                    <Tooltip text="Hapus user">
+                      <button
+                        onClick={() => handleDelete(u)}
+                        className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-1"
+                      >
+                        <Ban size={14} />
+                      </button>
+                    </Tooltip>
                   )}
                 </td>
               </tr>

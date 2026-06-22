@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { TrendingUp, Coins, ShoppingCart, AlertTriangle, ArrowRight, Plus, RefreshCw } from 'lucide-react';
 import { Product, Transaction } from '../types';
 import { formatRupiah } from '../utils';
+import Tooltip from './Tooltip';
 
 interface DashboardOverviewProps {
   products: Product[];
@@ -390,13 +391,14 @@ export default function DashboardOverview({
                           {p.unit}
                         </span>
                       </div>
-                      <button
-                        onClick={() => handleRestockClick(p.id)}
-                        className="bg-indigo-600 text-white p-2.5 rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center cursor-pointer"
-                        title="Tambah Stok"
-                      >
-                        <Plus size={16} />
-                      </button>
+                      <Tooltip text="Tambah Stok">
+                        <button
+                          onClick={() => handleRestockClick(p.id)}
+                          className="bg-indigo-600 text-white p-2.5 rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center cursor-pointer"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </Tooltip>
                     </div>
                   </div>
                 ))
