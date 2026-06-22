@@ -21,8 +21,6 @@ import { auth } from './firebase';
 import { User, Product, Transaction } from './types';
 import { INITIAL_PRODUCTS, INITIAL_TRANSACTIONS } from './initialData';
 import {
-  fetchProducts,
-  fetchTransactions,
   addProduct,
   updateProduct,
   deleteProduct,
@@ -30,6 +28,8 @@ import {
   deleteTransaction,
   resetDatabase,
   getUserProfile,
+  subscribeProducts,
+  subscribeTransactions,
 } from './db';
 import Login from './components/Login';
 import Tooltip from './components/Tooltip';
@@ -98,35 +98,29 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  // 1. Initial hydration from Firestore
+  // 1. Real-time Firestore listeners with seeding
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        let dbProducts = await fetchProducts();
-        let dbTransactions = await fetchTransactions();
+    setIsLoading(true);
 
-        // If empty, seed with initial data
-        if (dbProducts.length === 0) {
-          for (const p of INITIAL_PRODUCTS) await addProduct(p);
-          dbProducts = INITIAL_PRODUCTS;
-        }
-
-        if (dbTransactions.length === 0 && INITIAL_TRANSACTIONS.length > 0) {
-          for (const t of INITIAL_TRANSACTIONS) await addTransaction(t);
-          dbTransactions = INITIAL_TRANSACTIONS;
-        }
-
-        setProducts(dbProducts);
-        setTransactions(dbTransactions);
-      } catch (error) {
-        console.error('Failed to load data from Firestore', error);
-      } finally {
-        setIsLoading(false);
+    const unsubProducts = subscribeProducts((products) => {
+      if (products.length === 0 && INITIAL_PRODUCTS.length > 0) {
+        INITIAL_PRODUCTS.forEach(p => addProduct(p));
       }
-    };
+      setProducts(products);
+      setIsLoading(false);
+    });
 
-    loadData();
+    const unsubTransactions = subscribeTransactions((transactions) => {
+      if (transactions.length === 0 && INITIAL_TRANSACTIONS.length > 0) {
+        INITIAL_TRANSACTIONS.forEach(t => addTransaction(t));
+      }
+      setTransactions(transactions);
+    });
+
+    return () => {
+      unsubProducts();
+      unsubTransactions();
+    };
   }, []);
 
   // 2. Real-time clock tick updates & Fullscreen listener

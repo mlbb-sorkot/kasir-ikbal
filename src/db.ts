@@ -9,7 +9,8 @@ import {
   query,
   orderBy,
   where,
-  limit
+  limit,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Product, Transaction, User } from './types';
@@ -59,6 +60,13 @@ export async function deleteProduct(id: string): Promise<void> {
   await deleteDoc(doc(db, 'products', id));
 }
 
+export function subscribeProducts(callback: (products: Product[]) => void): () => void {
+  return onSnapshot(productsCol, (snap) => {
+    const products = snap.docs.map(d => ({ ...d.data(), id: d.id } as Product));
+    callback(products);
+  });
+}
+
 // ─── Transactions ────────────────────────────────────────────────
 export async function fetchTransactions(): Promise<Transaction[]> {
   const q = query(transactionsCol, orderBy('timestamp', 'desc'));
@@ -72,6 +80,14 @@ export async function addTransaction(tx: Transaction): Promise<void> {
 
 export async function deleteTransaction(id: string): Promise<void> {
   await deleteDoc(doc(db, 'transactions', id));
+}
+
+export function subscribeTransactions(callback: (transactions: Transaction[]) => void): () => void {
+  const q = query(transactionsCol, orderBy('timestamp', 'desc'));
+  return onSnapshot(q, (snap) => {
+    const transactions = snap.docs.map(d => ({ ...d.data(), id: d.id } as Transaction));
+    callback(transactions);
+  });
 }
 
 // ─── Reset ───────────────────────────────────────────────────────
