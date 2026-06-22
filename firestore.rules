@@ -20,7 +20,7 @@ service cloud.firestore {
     match /products/{productId} {
       allow read: if isSignedIn();
       allow create, delete: if isAdmin();
-      allow update: if isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock']);
+      allow update: if isSignedIn() && request.resource.data.keys().hasOnly(['stock']);
     }
 
     match /transactions/{txId} {
