@@ -40,7 +40,7 @@ export default function POSTerminal({
       const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           p.sku.toLowerCase().includes(searchTerm.toLowerCase());
       const matchCategory = selectedCategory === 'Semua' || p.category === selectedCategory;
-      return matchSearch && matchCategory;
+      return matchSearch && matchCategory && (p.stock ?? 0) > 0;
     });
   }, [products, searchTerm, selectedCategory]);
 
